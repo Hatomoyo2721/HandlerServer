@@ -1,0 +1,14 @@
+{
+    "def": {
+        "id": "e7beaa31-da33-476d-a0e7-2740f8d7265d",
+        "ipAddress": "192.168.1.106",
+        "password": "12345",
+        "port": 4321
+    },
+    "abc": {
+        "id": "0fb5ae4d-74fe-49fb-ba69-64668072e8ff",
+        "ipAddress": "192.168.1.106",
+        "password": "huflit123",
+        "port": 4321
+    }
+}
