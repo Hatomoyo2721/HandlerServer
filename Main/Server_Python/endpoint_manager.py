@@ -1,13 +1,15 @@
+from asyncio import Server
 import socket
 import struct
-import json
 import os
 import pathlib
+import logging
+import traceback
 from user_manager import UserManager
 from share_manager import ShareManager
 
 class EndpointManager:
-    BASE_DIR = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = pathlib.Path(__file__).resolve().parent
 
     def __init__(self, server):
         self.server = server
@@ -17,54 +19,42 @@ class EndpointManager:
         self.register_endpoints()
 
     def register_endpoints(self):
-        self.endpoints_mapping['index'] = self.index
         self.endpoints_mapping['add_user'] = self.user_manager.add_user
-        self.endpoints_mapping['upload'] = self.user_manager.upload
         self.endpoints_mapping['create_directory'] = self.user_manager.create_directory
-        self.endpoints_mapping['list_directory'] = self.user_manager.list_directory
-        self.endpoints_mapping['list_directory'] = self.user_manager.list_directory
+        self.endpoints_mapping['load_directory'] = self.user_manager.load_directory
         self.endpoints_mapping['add_share_user'] = self.share_manager.add_share_user
         self.endpoints_mapping['get_share_users'] = self.share_manager.get_share_users
-        
+
     @staticmethod
     def readUTF(s: socket.socket):
         try:
-            data = s.recv(2)
-            if not data:
-                return None
-            length = struct.unpack("!H", data)[0]
-            data = s.recv(length)
+            data_length = struct.unpack("!H", s.recv(2))[0]
+            data = s.recv(data_length).decode('utf-8')
             return data
         except Exception as e:
-            print(f"Error reading UTF: {e}")
+            logging.error(f"Error reading UTF-8 data: {e}\n{traceback.format_exc()}")
             return None
 
     @staticmethod
     def writeUTF(s: socket.socket, msg: str):
-        return
+        try:
+            data = msg.encode('utf-8')
+            length = struct.pack("!H", len(data))
+            s.sendall(length + data)
+        except Exception as e:
+            logging.error(f"Error writing UTF: {e}\n")
 
     def recv_code(self, s: socket.socket):
         try:
             code = self.readUTF(s)
             if not code:
                 return
-            code = code.decode()
-            print("\nCode: {}".format(code))
+            logging.info(f"Code: {code}\n")
             if code in self.endpoints_mapping:
                 self.endpoints_mapping[code](s)
             else:
-                print(f"Unknown code: {code}")
+                logging.warning(f"Unknown code: {code}\n")
         except Exception as err:
-            print(f"Error receiving code: {err}")
+            logging.error(f"Error receiving code: {err}\n")
         finally:
-            if s._closed:
-                return
             s.close()
-
-    def index(self, s: socket.socket):
-        while True:
-            data = self.readUTF(s)
-            if not data:
-                break
-            print(data.decode())
-        s.close()
