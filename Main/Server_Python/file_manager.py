@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 import mimetypes
@@ -26,18 +27,22 @@ class FileManager:
                 if user_dir.exists() and user_dir.is_dir():
                     files_and_dirs = []
                     for entry in user_dir.iterdir():
+                        path_res_split = str(entry.resolve()).split(os.sep)
+                        print(path_res_split)
+                        path_res = "/".join(path_res_split[path_res_split.index(username):])
+
                         if entry.is_file():
                             file_type = self.get_file_type(entry)
                             files_and_dirs.append({
                                 "name": entry.name,
                                 "type": file_type,
-                                "path": str(entry.resolve())
+                                "path": path_res
                             })
                         elif entry.is_dir():
                             files_and_dirs.append({
                                 "name": entry.name,
                                 "type": "directory",
-                                "path": str(entry.resolve())
+                                "path": path_res
                             })
 
                     response = json.dumps(files_and_dirs)
