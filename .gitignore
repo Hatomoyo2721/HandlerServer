@@ -1,1 +1,8 @@
 /Test
+Main/users.db
+Main/__pycache__/endpoint_manager.cpython-312.pyc
+Main/__pycache__/user_manager.cpython-312.pyc
+Main/old/endpoint_manager_old.py
+Main/old/server_old.py
+Main/old/user_manger_old.py
+Main/public_directory
